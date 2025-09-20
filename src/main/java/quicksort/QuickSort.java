@@ -1,6 +1,8 @@
 package quicksort;
 
 import metrics.Metrics;
+import utils.ArrayUtils;
+
 import java.util.Random;
 
 public class QuickSort {
@@ -17,45 +19,19 @@ public class QuickSort {
         metrics.enterRecursion();
 
         while (left < right) {
-            int pivotIndex = partition(arr, left, right, metrics);
+            int pivotIndex = left + rand.nextInt(right - left + 1);
+            int pivotValue = arr[pivotIndex];
 
-
-            if (pivotIndex - left < right - pivotIndex) {
-                quickSort(arr, left, pivotIndex - 1, metrics);
-                left = pivotIndex + 1;
+            int index = ArrayUtils.partition(arr, left, right, pivotValue, metrics);
+            if (index - left < right - index) {
+                quickSort(arr, left, index - 1, metrics);
+                left = index + 1;
             } else {
-                quickSort(arr, pivotIndex + 1, right, metrics);
-                right = pivotIndex - 1;
+                quickSort(arr, index + 1, right, metrics);
+                right = index - 1;
             }
         }
 
         metrics.exitRecursion();
-    }
-
-
-    // Hoare partition
-    private static int partition(int[] arr, int left, int right, Metrics metrics) {
-        int pivotIndex = left + rand.nextInt(right - left + 1);
-        int pivot = arr[pivotIndex];
-        swap(arr, pivotIndex, right, metrics);
-
-        int i = left;
-        for (int j = left; j < right; j++) {
-            metrics.inComparisons();
-            if (arr[j] <= pivot) {
-                swap(arr, i, j, metrics);
-                i++;
-            }
-        }
-        swap(arr, i, right, metrics);
-        return i;
-    }
-
-
-    private static void swap(int[] arr, int i, int j, Metrics metrics) {
-        int temp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = temp;
-        metrics.inOperations();
     }
 }

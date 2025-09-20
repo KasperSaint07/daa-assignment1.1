@@ -1,6 +1,8 @@
 package select;
 
 import metrics.Metrics;
+import utils.ArrayUtils;
+
 import java.util.Arrays;
 
 public class DeterministicSelect {
@@ -21,7 +23,7 @@ public class DeterministicSelect {
         }
 
         int pivot = medianOfMedians(arr, left, right, metrics);
-        int pivotIndex = partition(arr, left, right, pivot, metrics);
+        int pivotIndex = ArrayUtils.partition(arr, left, right, pivot, metrics);
 
         if (k == pivotIndex) {
             metrics.exitRecursion();
@@ -37,7 +39,6 @@ public class DeterministicSelect {
         }
     }
 
-    // Median of Medians pivot
     private static int medianOfMedians(int[] arr, int left, int right, Metrics metrics) {
         int n = right - left + 1;
         int numMedians = (int) Math.ceil((double) n / 5.0);
@@ -46,7 +47,7 @@ public class DeterministicSelect {
         for (int i = 0; i < numMedians; i++) {
             int subLeft = left + i * 5;
             int subRight = Math.min(subLeft + 4, right);
-            Arrays.sort(arr, subLeft, subRight + 1); // сортируем маленькую группу
+            Arrays.sort(arr, subLeft, subRight + 1);
             medians[i] = arr[subLeft + (subRight - subLeft) / 2];
         }
 
@@ -55,34 +56,5 @@ public class DeterministicSelect {
         } else {
             return medianOfMedians(medians, 0, medians.length - 1, metrics);
         }
-    }
-
-    private static int partition(int[] arr, int left, int right, int pivotValue, Metrics metrics) {
-        int pivotIndex = left;
-        for (int i = left; i <= right; i++) {
-            if (arr[i] == pivotValue) {
-                pivotIndex = i;
-                break;
-            }
-        }
-        swap(arr, pivotIndex, right, metrics);
-
-        int storeIndex = left;
-        for (int i = left; i < right; i++) {
-            metrics.inComparisons();
-            if (arr[i] < pivotValue) {
-                swap(arr, i, storeIndex, metrics);
-                storeIndex++;
-            }
-        }
-        swap(arr, storeIndex, right, metrics);
-        return storeIndex;
-    }
-
-    private static void swap(int[] arr, int i, int j, Metrics metrics) {
-        int temp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = temp;
-        metrics.inOperations();
     }
 }

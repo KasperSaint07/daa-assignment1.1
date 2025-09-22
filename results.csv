@@ -1,2 +1,2 @@
 algo,size,trial,time(ms),comparisons,operations,maxDepth
-mergesort,100,1,0,597,689,4
+mergesort,100,1,0,571,663,4

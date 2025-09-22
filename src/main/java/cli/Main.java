@@ -15,7 +15,6 @@
                     case "--trials" -> trials = Integer.parseInt(args[++i]);
                 }
             }
-
             try (FileWriter csv = new FileWriter("results.csv")) {
                 csv.write("algo,size,trial,time(ms),comparisons,operations,maxDepth\n");
 

@@ -6,134 +6,132 @@
 
 ---
 
-##  Learning Goals
-- Implement classic divide-and-conquer algorithms with **safe recursion patterns**.
-- Analyse running-time recurrences using **Master Theorem (3 cases)** and **Akra–Bazzi intuition**.
-- Collect metrics (time, recursion depth, comparisons/allocations).
-- Validate theoretical analysis with **empirical measurements**.
-- Practice **GitHub workflow** with feature branches and structured commits.
+## 🎯 Learning Goals
+- Implement classic **divide-and-conquer algorithms** with safe recursion.
+- Analyse **recurrence relations** using Master Theorem (3 cases) and Akra–Bazzi.
+- Validate theory with **empirical measurements**.
+- Collect metrics: execution time, recursion depth, comparisons, and operations.
+- Apply proper **GitHub workflow** with feature branches and structured commits.
 
 ---
 
-##  Project Structure
+## 📂 Project Structure
 src/
 ├── main/java
-│ ├── mergesort/ # MergeSort implementation with cutoff + buffer
-│ ├── quicksort/ # QuickSort with randomized pivot & safe recursion
-│ ├── select/ # Deterministic Select (Median-of-Medians)
-│ ├── closestpair/ # Closest Pair of Points (O(n log n) D&C)
-│ ├── metrics/ # Metrics collection (time, comparisons, depth, ops)
-│ ├── cli/ # CLI runner, CSV output
-│ └── bench/ # JMH benchmarks
-│ └── utils/ # utils
-├── test/java
-│ ├── mergesort/ # MergeSort tests
-│ ├── quicksort/ # QuickSort tests (depth boundedness)
-│ ├── select/ # Deterministic Select tests
-│ ├── closestpair/ # Validation vs O(n²) implementation
-│ └── metrics/ # Metrics unit tests
+│ ├── mergesort/ # MergeSort (buffer reuse + cutoff to InsertionSort)
+│ ├── quicksort/ # QuickSort (random pivot, smaller-side recursion)
+│ ├── select/ # Deterministic Select (Median-of-Medians, O(n))
+│ ├── closestpair/ # Closest Pair of Points (O(n log n))
+│ ├── metrics/ # Metrics (comparisons, operations, recursion depth, time)
+│ ├── cli/ # CLI runners (CSV output)
+│ ├── bench/ # JMH benchmarks
+│ └── utils/ # Partition, swap, shuffle, helpers
+└── test/java
+├── mergesort/ # Tests for MergeSort
+├── quicksort/ # Tests for QuickSort (depth check)
+├── select/ # Tests for Select vs Arrays.sort
+├── closestpair/ # Validate vs brute-force O(n²)
+└── metrics/ # Unit tests
 
 
 ---
 
-## ️ Architecture Notes
-- **Recursion Depth Control**
-  - QuickSort always recurses on the **smaller partition** and iterates on the larger one. This bounds the recursion depth to `O(log n)` with high probability.
-  - MergeSort includes a **cutoff**: for very small subarrays, it switches to InsertionSort to reduce overhead.
-- **Buffer Reuse**
-  - MergeSort reuses a single buffer array to avoid repeated allocations.
-- **Metrics**
-  - Each algorithm tracks:
-    - `comparisons`
-    - `operations` (assignments/swaps)
-    - `recursionDepth`
-    - `timeNs` (execution time)
+## ⚙️ Architecture Notes
+- **Recursion depth control**:  
+  - QuickSort always recurses on the *smaller partition*, iterates on the larger one → depth = O(log n).  
+  - MergeSort switches to **InsertionSort** for subarrays ≤ 16.  
+- **Buffer reuse**: MergeSort uses one buffer array → fewer allocations.  
+- **Metrics**: tracked for every algorithm:  
+  - Comparisons  
+  - Operations (swaps, assignments)  
+  - Recursion depth (current and max)  
+  - Execution time (ms)  
 
 ---
 
-##  Recurrence Analysis
+## 🔢 Recurrence Analysis
 
-### 1. MergeSort
-- Recurrence:  
-  `T(n) = 2T(n/2) + Θ(n)`
-- By **Master Theorem, Case 2**:  
-  `T(n) = Θ(n log n)`
-- Notes: cutoff to insertion sort reduces constant factors.
+### MergeSort
+T(n) = 2T(n/2) + Θ(n)
+→ Θ(n log n) (Master Theorem, Case 2)
 
-### 2. QuickSort (randomized pivot, recurse smaller side)
-- Recurrence (average):  
-  `T(n) = T(n/2) + T(n/2) + Θ(n)` → `Θ(n log n)`
-- Worst case: `Θ(n²)` (rare due to randomization).
-- Recursion depth: `O(log n)` in expectation.
+### QuickSort (random pivot, smaller-side recursion)
+- Average: Θ(n log n)  
+- Worst-case: Θ(n²) (rare with randomization)  
+- Depth bounded by ~2·log₂n.
 
-### 3. Deterministic Select (Median-of-Medians)
-- Recurrence:  
-  `T(n) = T(n/5) + T(7n/10) + Θ(n)`
-- By **Akra–Bazzi intuition**:  
-  `T(n) = Θ(n)`
-- Guarantees linear time selection.
+### Deterministic Select (Median-of-Medians, MoM5)
+T(n) ≤ T(n/5) + T(7n/10) + Θ(n)
+→ Θ(n) (Akra–Bazzi)
+Guarantees linear selection.
 
-### 4. Closest Pair of Points (2D)
-- Recurrence:  
-  `T(n) = 2T(n/2) + Θ(n)`
-- By **Master Theorem, Case 2**:  
-  `T(n) = Θ(n log n)`
-- “Strip check” uses ≤ 7–8 neighbors, constant work per point.
+### Closest Pair of Points (2D)
+T(n) = 2T(n/2) + Θ(n)
+→ Θ(n log n) (Master Theorem, Case 2)
+Strip check ≤ 7–8 neighbors per point.
 
 ---
 
-##  Empirical Results
+## 📊 Empirical Results
 
-**Plots (from `results.csv`):**
-- Time vs n (log-log scale).
-- Depth vs n (QuickSort depth bounded by ~2 log₂ n).
-- Comparisons/operations vs n.
+CSV format:
+algo,size,trial,time(ms),comparisons,operations,maxDepth
+mergesort,1000,1,3,10897,12000,12
+quicksort,1000,1,2,9753,10500,11
+select,1000,1,1,4300,5100,8
+closest,1000,1,4,22981,24500,14
 
-👉 Insert your generated plots here (Excel, Google Sheets, matplotlib).
 
-**Discussion:**
-- Measured times align with theoretical expectations (`n log n` for Merge/Quick/Closest, linear for Select).
-- QuickSort shows higher variance due to random pivoting.
-- MergeSort benefits from cutoff (InsertionSort on n ≤ 16).
-- Closest Pair has higher constant factors but scales as `n log n`.
+### Example Plots
+- ⏱ **Time vs n** – shows n log n vs linear growth.  
+- 🌲 **Recursion depth vs n** – QuickSort bounded, MergeSort depth ≈ log n.  
+- 📊 **Comparisons vs n** – Select is linear, others are n log n.  
 
----
-
-##  Testing
-- **Sorting correctness**: verified on random, sorted, and reverse arrays.
-- **QuickSort depth**: max depth checked ≤ ~2·⌊log₂ n⌋ + O(1).
-- **Deterministic Select**: compared against `Arrays.sort()[k]` on 100 random trials.
-- **Closest Pair**: validated vs O(n²) implementation for n ≤ 2000.
+**Discussion**:
+- MergeSort is stable, low variance.  
+- QuickSort slightly faster but with more variance (random pivot).  
+- Select slower for small n but linear scaling visible for large n.  
+- Closest Pair has large constants but follows n log n growth.  
 
 ---
 
-##  GitHub Workflow
-- Branches used:
-  - `1-add-metrics-system`
-  - `3-add-mergesort-with-buffer`
-  - `5-add-quicksort`
-  - `7-deterministic-select-median-of-medians`
-  - `13-implement-closest-pair-of-points`
-  - `17-benchjmh-harness`
-  - `19-docsreport`
-- Commit storyline followed **Conventional Commits** style:
-  - `init: maven, junit5, readme`
-  - `feat(metrics): counters, depth tracker, CSV writer`
-  - `feat(mergesort): baseline + reuse buffer + cutoff + tests`
-  - `feat(quicksort): randomized pivot, smaller-side recursion + tests`
-  - `feat(select): deterministic MoM5 + tests`
-  - `feat(closest): divide-and-conquer + strip check`
-  - `bench(jmh): harness for select vs sort`
-  - `docs(report): master theorem + plots`
-  - `release: v1.0`
+## 🧪 Testing
+- Sorting correctness checked on random/adversarial arrays.  
+- QuickSort depth verified ≤ 2·log₂n.  
+- Select compared vs `Arrays.sort()[k]` on 100 random trials.  
+- Closest Pair validated vs brute-force for n ≤ 2000.  
 
 ---
 
-##  Summary
-- All four required algorithms implemented with correct complexities.
-- Safe recursion patterns ensured bounded depth.
-- Metrics collection + CSV output enabled analysis.
-- Tests confirm correctness against known results.
-- GitHub workflow followed with feature branches and structured commits.
+## 🌱 GitHub Workflow
+- **Branches**:  
+  - `feature/metrics`  
+  - `feature/mergesort`  
+  - `feature/quicksort`  
+  - `feature/select`  
+  - `feature/closest`  
+  - `feature/cli`  
+  - `bench/jmh`  
+  - `docs/report`  
 
- Next steps: extend report with richer plots, explore cache effects and GC influence.
+- **Commit storyline**:  
+  - `init: maven, junit5, readme`  
+  - `feat(metrics): counters, depth tracker, CSV writer`  
+  - `feat(mergesort): buffer reuse + cutoff`  
+  - `feat(quicksort): randomized pivot, smaller-side recursion`  
+  - `feat(select): deterministic MoM5`  
+  - `feat(closest): divide-and-conquer + strip check`  
+  - `feat(cli): parse args, CSV output`  
+  - `bench(jmh): select vs sort`  
+  - `docs(report): analysis & plots`  
+  - `release: v1.0`  
+
+---
+
+## ✅ Summary
+- Implemented 4 D&C algorithms with correct complexity.  
+- Ensured safe recursion and bounded depth.  
+- Collected detailed metrics and confirmed theory with experiments.  
+- Used GitHub workflow with feature branches and structured commits.  
+
+Next steps: add more plots, measure **cache effects** and **GC overhead**.

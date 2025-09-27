@@ -1,19 +1,26 @@
 package mergesort;
 
 import metrics.Metrics;
+import sort.SortingAlgorithm;
 
-public class MergeSort {
+public class MergeSort implements SortingAlgorithm {
 
-    private static final int CUTOFF = 16; // при малых n используем InsertionSort
+    private static final int CUTOFF = 16; // порог для insertion sort
 
-    public static void sort(int[] arr, Metrics metrics) {
+    @Override
+    public void sort(int[] arr, Metrics metrics) {
         int[] buffer = new int[arr.length];
         metrics.start();
-        mergeSort(arr, buffer, 0, arr.length - 1, metrics, 1);
+        mergeSort(arr, buffer, 0, arr.length - 1, metrics);
         metrics.stop();
     }
 
-    private static void mergeSort(int[] arr, int[] buffer, int left, int right, Metrics metrics, int depth) {
+    @Override
+    public String name() {
+        return "mergesort";
+    }
+
+    private void mergeSort(int[] arr, int[] buffer, int left, int right, Metrics metrics) {
         metrics.enterRecursion();
 
         if (right - left <= CUTOFF) {
@@ -23,14 +30,14 @@ public class MergeSort {
         }
 
         int mid = (left + right) / 2;
-        mergeSort(arr, buffer, left, mid, metrics, depth + 1);
-        mergeSort(arr, buffer, mid + 1, right, metrics, depth + 1);
+        mergeSort(arr, buffer, left, mid, metrics);
+        mergeSort(arr, buffer, mid + 1, right, metrics);
         merge(arr, buffer, left, mid, right, metrics);
 
         metrics.exitRecursion();
     }
 
-    private static void insertionSort(int[] arr, int left, int right, Metrics metrics) {
+    private void insertionSort(int[] arr, int left, int right, Metrics metrics) {
         for (int i = left + 1; i <= right; i++) {
             int key = arr[i];
             int j = i - 1;
@@ -45,7 +52,7 @@ public class MergeSort {
         }
     }
 
-    private static void merge(int[] arr, int[] buffer, int left, int mid, int right, Metrics metrics) {
+    private void merge(int[] arr, int[] buffer, int left, int mid, int right, Metrics metrics) {
         int i = left, j = mid + 1, k = left;
 
         while (i <= mid && j <= right) {

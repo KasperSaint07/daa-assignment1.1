@@ -2,6 +2,7 @@ package cli;
 
 import mergesort.MergeSort;
 import metrics.Metrics;
+import sort.SortingAlgorithm;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,12 +10,13 @@ import java.io.IOException;
 public class MergeSortRunner implements AlgorithmRunner {
     @Override
     public void run(int size, int trials, FileWriter csv) throws IOException {
+        SortingAlgorithm algo = new MergeSort(); // ✅ создаём объект
         for (int t = 1; t <= trials; t++) {
             int[] arr = randomArray(size);
             Metrics m = new Metrics();
-            MergeSort.sort(arr, m);
-            csv.write(String.format("mergesort,%d,%d,%d,%d,%d,%d\n",
-                    size, t, m.getTimeMillis(),
+            algo.sort(arr, m);
+            csv.write(String.format("%s,%d,%d,%d,%d,%d,%d\n",
+                    algo.name(), size, t, m.getTimeMillis(),
                     m.getComparisons(), m.getOperations(), m.getMaxDepth()));
         }
     }
